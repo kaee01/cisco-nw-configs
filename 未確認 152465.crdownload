@@ -1,0 +1,128 @@
+! ============================================================
+! WLC-CISCO-01 - Cisco WLC CLIコンフィグ（参考設定）
+! 案件: Cisco無線NW 構築（架空企業想定）
+! 作成目的: GitHubポートフォリオ用 自己研鑽アウトプット
+! ※ WLC設定のメインはGUI（管理画面）で実施する
+!   本ファイルはCLIで投入・確認できる設定を記載
+! ============================================================
+
+! ============================================================
+! 【1】初期ウィザード応答例（コンソール接続時）
+! ============================================================
+!
+! Would you like to terminate autoinstall? [yes]: yes
+! System Name: WLC-CISCO-01
+! Administrative User Name: admin
+! Administrative Password: <password>
+! Management Interface IP Address: 172.16.0.10
+! Management Interface Netmask: 255.255.255.0
+! Management Interface Default Router: 172.16.0.1
+! Management Interface VLAN Identifier: 200
+! AP Manager Interface IP Address: 172.16.0.10
+! Virtual Gateway IP Address: 192.0.2.1
+! Mobility/RF Group Name: RF-GROUP-CORP
+! Network Name (SSID): CORP-WLAN
+! Configure RADIUS Server now? [YES][no]: no
+! Enter Country Code: JP
+! Enable 802.11b Network [YES][no]: YES
+! Enable 802.11a Network [YES][no]: YES
+! Configure NTP server now? [YES][no]: YES
+! NTP Server IP Address: 131.107.13.100
+! Polling Interval: 3600
+! Would you like to save them now? [YES][no]: YES
+!
+! ============================================================
+! 【2】再起動後 CLI追加設定（SSH接続後に投入）
+! ============================================================
+
+! --- タイムゾーン確認 ---
+! show time
+
+! --- NTP同期確認 ---
+! show ntp
+
+! --- Syslog設定 ---
+config logging syslog host 172.16.0.254
+config logging syslog level informational
+config logging syslog facility local0
+
+! --- Syslog確認 ---
+! show logging
+
+! --- HA（冗長）設定 WLC-01側 ---
+config redundancy mode sso
+config redundancy peer-ip 172.16.0.11
+config redundancy timer keep-alive 1
+config redundancy timer peer-search 1
+save config
+
+! --- HA確認 ---
+! show redundancy summary
+
+! --- AP接続確認 ---
+! show ap summary
+
+! --- クライアント確認 ---
+! show wireless client summary
+
+! --- コンフィグ保存 ---
+save config
+
+! ============================================================
+! 【3】GUIで設定する主要項目（管理画面操作）
+! ============================================================
+!
+! アクセス URL: https://172.16.0.10
+!
+! [インターフェース設定]
+!   Controller > Interfaces > New
+!   - vlan10-corp  / VLAN10 / 192.168.10.2 / GW:192.168.10.1
+!   - vlan20-guest / VLAN20 / 192.168.20.2 / GW:192.168.20.1
+!
+! [SSID（WLAN）設定]
+!   WLANs > Create New > Go
+!   業務SSID:
+!     Profile: CORP-WLAN / SSID: <corp-ssid-name>
+!     Interface: vlan10-corp
+!     Security > Layer2: WPA+WPA2 / AES / 802.1X
+!     Security > AAA Servers: RADIUS <radius-server-ip>
+!   ゲストSSID:
+!     Profile: GUEST-WLAN / SSID: <guest-ssid-name>
+!     Interface: vlan20-guest
+!     Security > Layer2: WPA+WPA2 / AES / PSK
+!
+! [RRM設定]
+!   Wireless > 802.11b/g/n > RRM > RF Grouping: Auto
+!   Wireless > 802.11b/g/n > RRM > DCA: Automatic
+!   Wireless > 802.11a/n/ac > RRM > RF Grouping: Auto
+!   Wireless > 802.11a/n/ac > RRM > DCA: Automatic
+!
+! [SNMP設定]
+!   Management > SNMP > Communities > New
+!   Community: <community-string> / Access: Read Only
+!
+! [Syslog設定]
+!   Management > Syslog
+!   Syslog Server: 172.16.0.254 / Level: Informational
+!
+! [コンフィグ保存]
+!   Commands > Save Config
+!
+
+! ============================================================
+! 【4】主要確認コマンド一覧
+! ============================================================
+
+! show ap summary                    --- AP接続状況（台数・状態）
+! show ap config general <AP名>      --- AP個別設定
+! show wireless client summary       --- 接続クライアント一覧
+! show wireless stats ap all         --- AP統計情報
+! show redundancy summary            --- HA状態確認
+! show ntp                           --- NTP同期確認
+! show logging                       --- Syslog設定確認
+! show interface detail              --- インターフェース詳細
+! save config                        --- 設定保存
+
+! ============================================================
+! EOF
+! ============================================================
