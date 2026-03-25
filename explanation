@@ -1,0 +1,4 @@
+L3SW-CORE-01.cfgVLAN/SVI/ルーティング/STP/ACL/NTP/Syslog/SNMP 完全構成
+L2SW-HQ-F1-01.cfgAPポート（trunk+portfast）/端末ポート（bpduguard）/PoE/管理系 完全構成
+WLC-CISCO-01_cli.cfgウィザード応答例 + CLI追加設定 + GUI設定手順コメント + 確認コマンド一覧
+AP-HQ-001_reference.cfgWLC管理下のAP設定方針 + CAPWAP切り分け手順 + CLI確認コマンド
